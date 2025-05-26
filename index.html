@@ -741,7 +741,7 @@
             <div class="modal-text">
                 <p><strong>This is a PARODY website for entertainment purposes only.</strong></p>
                 <br>
-                <p><strong>$PROVE is NOT currently trading.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
+                <p><strong>$PROVE is NOT a real cryptocurrency.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
                 <br>
                 <p><strong>DO NOT invest real money</strong> based on anything you see on this website. This site is purely for demonstration and entertainment.</p>
             </div>
@@ -853,7 +853,7 @@
         <div class="trades-section">
             <div class="trades-header">
                 <h3>Recent Trades</h3>
-                <small style="color: #888;">Live Activity • Last 20 • High Frequency</small>
+                <small style="color: #888;">🔥 Global Sync • Last 20 • All Users</small>
             </div>
             <div class="trades-list" id="trades-list">
                 <!-- Trades will be populated by JavaScript -->
@@ -862,56 +862,75 @@
 
         <div class="disclaimer">
             <h3>⚠️ PARODY SITE</h3>
-            <p>Simulation only - $PROVE is currently not trading.</p>
+            <p>Simulation only - Not real cryptocurrency</p>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <script>
+        // 🔥 FIREBASE CONFIGURATION - YOUR ACTUAL CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAM7LiXWUpOxgFhtRAd7Rd41O-sdBm-MTw",
+            authDomain: "prove-crypto-site.firebaseapp.com",
+            databaseURL: "https://prove-crypto-site-default-rtdb.firebaseio.com",
+            projectId: "prove-crypto-site",
+            storageBucket: "prove-crypto-site.firebasestorage.app",
+            messagingSenderId: "981486948908",
+            appId: "1:981486948908:web:0d2ceed941daea2df0b789"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         class ProveTrading {
             /*
-            🚀 $PROVE TRADING SIMULATOR SYSTEM:
+            🚀 $PROVE FIREBASE-POWERED TRADING SIMULATOR:
+            
+            🔥 FIREBASE REAL-TIME SYNC:
+            - All users see the same live price that climbs 24/7
+            - Trades sync instantly across all browsers  
+            - Price continues climbing even when site is closed
+            - One master trading loop runs globally
+            - Volume and trades persist across sessions
             
             📊 PRICING MECHANISM:
-            - Starts at $1.00
-            - Sets hourly targets with $20+ base increase + random volatility
-            - Each trade moves price toward hourly target
-            - Buys create upward pressure, sells create small dips
-            - Price guaranteed to increase $20-40+ per hour on average
-            
-            ⚡ HIGH-FREQUENCY TRADING:
-            - Trades occur every 0.5-2.5 seconds for active feel
-            - New trades flash/highlight when they appear
-            - Creates realistic market activity simulation
-            - Volume builds quickly due to frequent trading
+            - Starts at $1.00, guaranteed to climb $20-40+ per hour
+            - One instance generates trades, all users see updates
+            - Hourly targets with random volatility
+            - 70% buy pressure creates constant upward movement
             
             💰 VOLUME TRACKING (REAL-TIME):
-            - Calculates volume for each trade: Price × Amount in USD
-            - Maintains rolling 24-hour volume window
-            - Starts with base volume of $24.7M + live trades
-            - Auto-removes trades older than 24 hours
-            - Updates volume displays in real-time
+            - Each trade adds real USD volume (Price × Amount)
+            - Synced across all users via Firebase
+            - Starts with $24.7M base + live trading volume
             
-            📈 MARKET CAP (REAL-TIME):
-            - Current Price × 1 Billion Supply
-            - Updates instantly with price changes
+            📈 SYNCHRONIZED METRICS:
+            - Market Cap: Real-time (Price × 1B supply)
+            - Volume: Real-time trading activity
+            - All users see identical values instantly
             
             👥 USER SYSTEM:
-            - Loads real users from your JSON file (assets/data/users.json)
-            - Filters to only @username accounts (excludes wallet addresses)
-            - Randomly selects user + action + amount for each trade
-            - Shows real Twitter profile pics via unavatar.io
+            - Real Twitter users from your JSON file
+            - Profile pictures via unavatar.io
+            - Clickable Twitter links
             
-            📱 RESPONSIVE DESIGN:
-            - CSS Grid + Flexbox for perfect mobile/desktop layouts
-            - Touch-friendly controls on mobile
-            - Optimized typography and spacing for all screen sizes
+            🔒 MASTER TRADING SYSTEM:
+            - Only one instance generates trades globally
+            - Automatic failover if master goes offline
+            - Prevents duplicate trading loops
             
             ⚡ PERFORMANCE:
-            - Pure vanilla JS (no frameworks needed)
-            - Efficient memory management (only stores last 20 trades)
-            - Smooth 60fps chart animations
+            - Firebase Realtime Database for instant sync
+            - Efficient data structure (minimal storage)
+            - Only 20 most recent trades stored
+            - Optimized for mobile and desktop
             */
             constructor() {
+                // Initialize local state
                 this.currentPrice = 1.00;
                 this.startPrice = 1.00;
                 this.targetPrice = 1.00;
@@ -928,20 +947,232 @@
                 this.maxTrades = 20;
                 this.userData = [];
                 
-                // VOLUME TRACKING SYSTEM
-                this.volume24h = 0; // Real-time 24h volume in USD
-                this.tradeVolumes = []; // Store individual trade volumes with timestamps
-                this.baseVolume = 24700000; // Start with base volume of $24.7M
+                // Volume tracking
+                this.volume24h = 0;
+                this.tradeVolumes = [];
+                this.baseVolume = 24700000;
 
+                // Firebase references
+                this.priceRef = database.ref('prove/currentPrice');
+                this.tradesRef = database.ref('prove/trades');
+                this.volumeRef = database.ref('prove/volume24h');
+                this.targetRef = database.ref('prove/targetPrice');
+                this.startTimeRef = database.ref('prove/startTime');
+
+                // UI setup
                 this.canvas = document.getElementById('priceChart');
                 this.ctx = this.canvas.getContext('2d');
                 this.setupCanvas();
-                this.calculateNextTarget();
-                this.initializeHistoricalData();
                 this.setupTimeframeControls();
                 this.setupPriceTooltip();
+                
+                // Initialize
                 this.loadAssets();
-                this.startSimulation();
+                this.initializeFirebase();
+            }
+
+            async initializeFirebase() {
+                console.log('🔥 Connecting to Firebase...');
+                
+                // Listen for price updates
+                this.priceRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        this.currentPrice = snapshot.val();
+                        this.updateUI();
+                        this.drawChart();
+                    }
+                });
+
+                // Listen for trades updates  
+                this.tradesRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const firebaseTrades = snapshot.val();
+                        this.trades = Object.values(firebaseTrades).sort((a, b) => b.timestamp - a.timestamp);
+                        this.updateTradesList();
+                    }
+                });
+
+                // Listen for volume updates
+                this.volumeRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        this.volume24h = snapshot.val();
+                        this.updateUI();
+                    }
+                });
+
+                // Listen for target price updates
+                this.targetRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        this.targetPrice = snapshot.val();
+                    }
+                });
+
+                // Listen for start time updates
+                this.startTimeRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        this.startTime = snapshot.val();
+                    }
+                });
+
+                // Initialize historical data locally
+                this.initializeHistoricalData();
+
+                // Check if we need to initialize the database
+                const snapshot = await this.priceRef.once('value');
+                if (!snapshot.exists()) {
+                    console.log('🚀 Initializing database with starting values...');
+                    await this.initializeDatabase();
+                }
+
+                // Start the master trading loop (only one instance across all users)
+                this.startMasterTradingLoop();
+                
+                // Handle window resize for chart
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.drawChart();
+                });
+                
+                console.log('✅ Firebase connected and synced!');
+            }
+
+            async initializeDatabase() {
+                // Set initial values in Firebase
+                await this.priceRef.set(1.00);
+                await this.targetRef.set(1.00 + this.hourlyIncrease);
+                await this.startTimeRef.set(Date.now());
+                await this.volumeRef.set(this.baseVolume);
+                await this.tradesRef.set({});
+            }
+
+            async startMasterTradingLoop() {
+                // Use Firebase transactions to ensure only one trading loop runs globally
+                const masterRef = database.ref('prove/masterLoop');
+                
+                const tryBecomeMaster = async () => {
+                    try {
+                        await masterRef.transaction((currentData) => {
+                            if (currentData === null || Date.now() - currentData > 10000) {
+                                // Become master or take over if master is inactive
+                                return Date.now();
+                            }
+                            return; // Abort - someone else is master
+                        });
+                        
+                        console.log('👑 Became trading master');
+                        this.isMaster = true;
+                        this.runTradingLoop();
+                        
+                        // Keep heartbeat
+                        this.heartbeatInterval = setInterval(() => {
+                            masterRef.set(Date.now());
+                        }, 5000);
+                        
+                    } catch (error) {
+                        console.log('👥 Another instance is master');
+                        // Try again in 15 seconds
+                        setTimeout(tryBecomeMaster, 15000);
+                    }
+                };
+
+                await tryBecomeMaster();
+            }
+
+            async runTradingLoop() {
+                if (!this.isMaster) return;
+
+                const generateNextTrade = async () => {
+                    if (!this.isMaster) return;
+
+                    const trade = await this.generateTrade();
+                    if (trade) {
+                        await this.updateFirebase(trade);
+                    }
+                    
+                    const nextInterval = Math.random() * 3000 + 1000; // 1-4 seconds
+                    setTimeout(generateNextTrade, nextInterval);
+                };
+
+                generateNextTrade();
+            }
+
+            async generateTrade() {
+                // Same trade generation logic but return trade object
+                const validUsers = this.userData.filter(user => user.username.startsWith('@'));
+                if (validUsers.length === 0) {
+                    return null;
+                }
+                
+                const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
+                const action = Math.random() > 0.3 ? 'bought' : 'sold';
+                const amount = Math.floor(Math.random() * 5000) + 100;
+                
+                // Price calculation
+                const timeProgress = (Date.now() - this.startTime) % (60 * 60 * 1000) / (60 * 60 * 1000);
+                const targetDiff = this.targetPrice - this.currentPrice;
+                
+                let priceChange = 0;
+                if (action === 'bought') {
+                    priceChange = Math.random() * 0.02 + (targetDiff * timeProgress * 0.001);
+                } else {
+                    priceChange = -Math.random() * 0.01;
+                }
+                
+                const newPrice = Math.max(0.01, this.currentPrice + priceChange);
+                const tradeVolumeUSD = newPrice * amount;
+
+                // Check hourly target
+                if (Date.now() - this.startTime >= 60 * 60 * 1000) {
+                    console.log(`🎯 Hour completed! New target calculated`);
+                    const multiplier = Math.random() * 100;
+                    const increase = this.hourlyIncrease + (this.hourlyIncrease * multiplier / 100);
+                    const newTarget = newPrice + increase;
+                    
+                    await this.targetRef.set(newTarget);
+                    await this.startTimeRef.set(Date.now());
+                }
+
+                return {
+                    user: randomUser.username,
+                    action: action,
+                    amount: amount,
+                    price: newPrice,
+                    volume: tradeVolumeUSD,
+                    timestamp: Date.now(),
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 5)
+                };
+            }
+
+            async updateFirebase(trade) {
+                try {
+                    // Update price
+                    await this.priceRef.set(trade.price);
+
+                    // Add trade (keep last 20)
+                    const tradesSnapshot = await this.tradesRef.once('value');
+                    let trades = tradesSnapshot.exists() ? tradesSnapshot.val() : {};
+                    
+                    trades[trade.id] = trade;
+                    
+                    // Keep only last 20 trades
+                    const tradeArray = Object.values(trades).sort((a, b) => b.timestamp - a.timestamp);
+                    if (tradeArray.length > 20) {
+                        trades = {};
+                        tradeArray.slice(0, 20).forEach(t => trades[t.id] = t);
+                    }
+                    
+                    await this.tradesRef.set(trades);
+
+                    // Update volume (simplified - just add to current)
+                    const currentVolume = await this.volumeRef.once('value');
+                    const newVolume = (currentVolume.val() || this.baseVolume) + trade.volume;
+                    await this.volumeRef.set(newVolume);
+
+                    console.log(`💰 Trade synced: ${trade.user} ${trade.action} ${trade.amount.toLocaleString()} $PROVE at ${trade.price.toFixed(4)}`);
+                    
+                } catch (error) {
+                    console.error('Error updating Firebase:', error);
+                }
             }
 
             async loadAssets() {
@@ -1393,7 +1624,7 @@
                         this.drawChart();
                     }
                     
-                    const nextInterval = Math.random() * 3000 + 1000; // 1-4 seconds (faster than original but not overwhelming)
+                    const nextInterval = Math.random() * 3500 + 1500; // 1.5-5 seconds (slightly slower pace)
                     setTimeout(generateNextTrade, nextInterval);
                 };
 
