@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$PROVE - The Future is Proven</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 0, 127, 0.3);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .price-tooltip {
+            position: absolute;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 0, 127, 0.4);
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .price-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #ff007f;
+        }
+
+        .logo:hover .price-tooltip {
+            opacity: 1;
+            visibility: visible;
+            top: -80px;
+        }
+
+        .logo h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 24px;
+            border-radius: 30px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-section {
+            background: rgba(255, 0, 127, 0.08);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 127, 0.6), transparent);
+        }
+
+        .price-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .price-info h2 {
+            font-size: 3.5rem;
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .price-change {
+            font-size: 1.3rem;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .time-controls {
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 6px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+        }
+
+        .time-btn {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #888;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .time-btn.active {
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+        }
+
+        .time-btn:hover:not(.active) {
+            color: #ff4081;
+            background: rgba(255, 0, 127, 0.1);
+        }
+
+        .chart-container {
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .price-metrics, .top-stats {
+            background: rgba(255, 0, 127, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        .price-metrics h3, .top-stats h3 {
+            color: #ff4081;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 0, 127, 0.1);
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 0, 127, 0.08);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff007f, #ff4081);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.3);
+        }
+
+        .stat-card h3 {
+            color: #ff4081;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .trades-section {
+            background: rgba(255, 0, 127, 0.08);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        .trades-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .trades-header h3 {
+            color: #ff4081;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .trades-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 0, 127, 0.4) transparent;
+        }
+
+        .trades-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .trades-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .trades-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 127, 0.4);
+            border-radius: 3px;
+        }
+
+        .trade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border-left: 4px solid #ff4081;
+            animation: slideIn 0.5s ease;
+            transition: all 0.3s ease;
+        }
+
+        .trade-item:hover {
+            background: rgba(255, 0, 127, 0.1);
+            transform: translateX(5px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes newTradeFlash {
+            0% { 
+                background: rgba(255, 0, 127, 0.3);
+                transform: scale(1.02);
+            }
+            100% { 
+                background: rgba(0, 0, 0, 0.2);
+                transform: scale(1);
+            }
+        }
+
+        .trade-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .trade-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ff4081;
+            object-fit: cover;
+            background: rgba(255, 0, 127, 0.2);
+        }
+
+        .trade-user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trade-user {
+            font-weight: 600;
+            color: #ff4081;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .trade-user:hover {
+            color: #ff6ec7;
+        }
+
+        .trade-action {
+            color: #00ff88;
+            margin-top: 4px;
+            font-size: 0.9rem;
+        }
+
+        .trade-amount {
+            color: #ffffff;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .disclaimer {
+            background: rgba(255, 0, 127, 0.12);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 40px;
+            backdrop-filter: blur(15px);
+        }
+
+        .disclaimer h3 {
+            color: #ff4081;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .disclaimer p {
+            color: #cccccc;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Modal Disclaimer */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 1;
+            visibility: visible;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+            border: 2px solid rgba(255, 0, 127, 0.4);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            margin: 20px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(255, 0, 127, 0.3);
+            animation: modalSlideIn 0.5s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .modal-title {
+            color: #ff4081;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-text {
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-text strong {
+            color: #ff4081;
+            font-weight: 600;
+        }
+
+        .modal-button {
+            background: linear-gradient(45deg, #ff007f, #ff4081);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 0, 127, 0.3);
+            min-width: 200px;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.4);
+        }
+
+        .modal-button:active {
+            transform: translateY(0);
+        }
+
+        /* Mobile Modal Adjustments */
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 30px 25px;
+                margin: 15px;
+                max-width: 90%;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+
+            .modal-text {
+                font-size: 1rem;
+            }
+
+            .modal-icon {
+                font-size: 3rem;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                text-align: center;
+                flex-direction: column;
+            }
+            
+            .logo {
+                order: 1;
+            }
+            
+            .market-status {
+                order: 2;
+                margin-top: 10px;
+            }
+            
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+            
+            .price-info h2 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .stat-card .value {
+                font-size: 1.6rem;
+            }
+            
+            .stat-card h3 {
+                font-size: 0.8rem;
+            }
+
+            .time-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .price-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .trade-user-info {
+                gap: 8px;
+            }
+
+            .trade-user-avatar {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .trades-section {
+                padding: 20px;
+            }
+            
+            .chart-section {
+                padding: 20px;
+            }
+            
+            .price-metrics, .top-stats {
+                padding: 20px;
+            }
+            
+            .trade-item {
+                padding: 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .trade-amount {
+                align-self: flex-end;
+                margin-top: -20px;
+            }
+        }
+
+        /* Tablet Responsive */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-content {
+                gap: 20px;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+            
+            .price-info h2 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 8px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px 10px;
+            }
+            
+            .stat-card .value {
+                font-size: 1.2rem;
+            }
+            
+            .time-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal Disclaimer -->
+    <div class="modal-overlay" id="disclaimerModal">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">IMPORTANT DISCLAIMER</h2>
+            <div class="modal-text">
+                <p><strong>This is a PARODY website for entertainment purposes only.</strong></p>
+                <br>
+                <p><strong>$PROVE is NOT currently trading.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
+                <br>
+                <p><strong>DO NOT invest real money</strong> based on anything you see on this website. This site is purely for demonstration and entertainment.</p>
+            </div>
+            <button class="modal-button" onclick="closeDisclaimer()">
+                Okay, I Understand
+            </button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon" id="logoIcon">
+                    P
+                </div>
+                <h1>$PROVE</h1>
+                <div class="price-tooltip" id="price-tooltip">Current: $1.00</div>
+            </div>
+            <div class="market-status">
+                <div class="status-dot"></div>
+                <span>Market Open • Live Trading</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="chart-section">
+                <div class="price-header">
+                    <div class="price-info">
+                        <h2 id="current-price">$1.00</h2>
+                        <div class="price-change">
+                            <span>↗</span>
+                            <span id="price-change">+$0.00 (0.00%)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="time-controls">
+                            <button class="time-btn" data-timeframe="1H">1H</button>
+                            <button class="time-btn active" data-timeframe="1D">1D</button>
+                            <button class="time-btn" data-timeframe="1W">1W</button>
+                            <button class="time-btn" data-timeframe="1M">1M</button>
+                        </div>
+                        <small style="color: #888; display: block; text-align: right; margin-top: 10px;">
+                            Last Updated: <span id="last-updated">Now</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="priceChart" class="chart"></canvas>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="price-metrics">
+                    <h3>Price Metrics</h3>
+                    <div class="metric-item">
+                        <span class="metric-label">24h High</span>
+                        <span class="metric-value" id="high-24h">$1.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">24h Low</span>
+                        <span class="metric-value" id="low-24h">$1.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">24h Volume</span>
+                        <span class="metric-value" id="volume-24h">$24.7M</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Market Cap</span>
+                        <span class="metric-value" id="market-cap-side">$1.00B</span>
+                    </div>
+                </div>
+
+                <div class="top-stats">
+                    <h3>Key Stats</h3>
+                    <div class="metric-item">
+                        <span class="metric-label">All Time High</span>
+                        <span class="metric-value" id="ath-side">$1.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Circulating Supply</span>
+                        <span class="metric-value">1.00B</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Supply</span>
+                        <span class="metric-value">1.00B</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Market Cap</h3>
+                <div class="value" id="market-cap">$1.00B</div>
+            </div>
+            <div class="stat-card">
+                <h3>24h Volume</h3>
+                <div class="value" id="volume">$24.7M</div>
+            </div>
+            <div class="stat-card">
+                <h3>Circulating Supply</h3>
+                <div class="value">1.00B PROVE</div>
+            </div>
+            <div class="stat-card">
+                <h3>All Time High</h3>
+                <div class="value" id="ath">$1.00</div>
+            </div>
+        </div>
+
+        <div class="trades-section">
+            <div class="trades-header">
+                <h3>Recent Trades</h3>
+                <small style="color: #888;">Live Activity • Last 20 • High Frequency</small>
+            </div>
+            <div class="trades-list" id="trades-list">
+                <!-- Trades will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <h3>⚠️ PARODY SITE</h3>
+            <p>Simulation only - $PROVE is currently not trading.</p>
+        </div>
+    </div>
+
+    <script>
+        class ProveTrading {
+            /*
+            🚀 $PROVE TRADING SIMULATOR SYSTEM:
+            
+            📊 PRICING MECHANISM:
+            - Starts at $1.00
+            - Sets hourly targets with $20+ base increase + random volatility
+            - Each trade moves price toward hourly target
+            - Buys create upward pressure, sells create small dips
+            - Price guaranteed to increase $20-40+ per hour on average
+            
+            ⚡ HIGH-FREQUENCY TRADING:
+            - Trades occur every 0.5-2.5 seconds for active feel
+            - New trades flash/highlight when they appear
+            - Creates realistic market activity simulation
+            - Volume builds quickly due to frequent trading
+            
+            💰 VOLUME TRACKING (REAL-TIME):
+            - Calculates volume for each trade: Price × Amount in USD
+            - Maintains rolling 24-hour volume window
+            - Starts with base volume of $24.7M + live trades
+            - Auto-removes trades older than 24 hours
+            - Updates volume displays in real-time
+            
+            📈 MARKET CAP (REAL-TIME):
+            - Current Price × 1 Billion Supply
+            - Updates instantly with price changes
+            
+            👥 USER SYSTEM:
+            - Loads real users from your JSON file (assets/data/users.json)
+            - Filters to only @username accounts (excludes wallet addresses)
+            - Randomly selects user + action + amount for each trade
+            - Shows real Twitter profile pics via unavatar.io
+            
+            📱 RESPONSIVE DESIGN:
+            - CSS Grid + Flexbox for perfect mobile/desktop layouts
+            - Touch-friendly controls on mobile
+            - Optimized typography and spacing for all screen sizes
+            
+            ⚡ PERFORMANCE:
+            - Pure vanilla JS (no frameworks needed)
+            - Efficient memory management (only stores last 20 trades)
+            - Smooth 60fps chart animations
+            */
+            constructor() {
+                this.currentPrice = 1.00;
+                this.startPrice = 1.00;
+                this.targetPrice = 1.00;
+                this.priceHistory = {
+                    '1H': [1.00],
+                    '1D': [1.00],
+                    '1W': [1.00],
+                    '1M': [1.00]
+                };
+                this.currentTimeframe = '1D';
+                this.startTime = Date.now();
+                this.hourlyIncrease = 20;
+                this.trades = [];
+                this.maxTrades = 20;
+                this.userData = [];
+                
+                // VOLUME TRACKING SYSTEM
+                this.volume24h = 0; // Real-time 24h volume in USD
+                this.tradeVolumes = []; // Store individual trade volumes with timestamps
+                this.baseVolume = 24700000; // Start with base volume of $24.7M
+
+                this.canvas = document.getElementById('priceChart');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+                this.calculateNextTarget();
+                this.initializeHistoricalData();
+                this.setupTimeframeControls();
+                this.setupPriceTooltip();
+                this.loadAssets();
+                this.startSimulation();
+            }
+
+            async loadAssets() {
+                // Load coin icon
+                this.loadCoinIcon();
+                
+                // Load user data
+                await this.loadUserData();
+            }
+
+            loadCoinIcon() {
+                const logoIcon = document.getElementById('logoIcon');
+                
+                // Try to load custom coin icon
+                const img = new Image();
+                img.onload = () => {
+                    logoIcon.innerHTML = '';
+                    logoIcon.appendChild(img);
+                };
+                img.onerror = () => {
+                    // If custom icon fails, try fallback
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => {
+                        logoIcon.innerHTML = '';
+                        logoIcon.appendChild(fallbackImg);
+                    };
+                    fallbackImg.onerror = () => {
+                        // Keep default "P" if both images fail
+                        console.log('No custom coin icon found, using default');
+                    };
+                    fallbackImg.src = './assets/images/fallback-icon.png';
+                };
+                img.src = './assets/images/coin-icon.png';
+                img.alt = 'PROVE Coin';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+            }
+
+            async loadUserData() {
+                try {
+                    const response = await fetch('./assets/data/users.json');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.userData = data.data || data; // Handle both formats
+                        console.log(`Loaded ${this.userData.length} users from JSON file`);
+                    } else {
+                        console.log('Users JSON file not found, using fallback data');
+                        this.loadFallbackUserData();
+                    }
+                } catch (error) {
+                    console.log('Error loading users JSON, using fallback data');
+                    this.loadFallbackUserData();
+                }
+            }
+
+            loadFallbackUserData() {
+                // Fallback user data if JSON file doesn't exist
+                this.userData = [
+                    {"rank":"#1","username":"@chencrypt","referredBy":"@nair_advaith","proofs":"43","cycles":"6339305197","stars":"21464"},
+                    {"rank":"#2","username":"@stepaks576","referredBy":"@Ulaskurtuluss","proofs":"20","cycles":"2573374891","stars":"21310"},
+                    {"rank":"#3","username":"@fijimlk","referredBy":"@mattstam_eth","proofs":"210","cycles":"25737891888","stars":"20865"},
+                    {"rank":"#4","username":"@Delta_web3","referredBy":"@st__4r","proofs":"25","cycles":"4998525296","stars":"20825"},
+                    {"rank":"#5","username":"@SaiMoo_n","referredBy":"@jtguibas","proofs":"65","cycles":"2120082215","stars":"18405"},
+                    {"rank":"#6","username":"@joesofth3art","referredBy":"@jtguibas","proofs":"63","cycles":"7397909606","stars":"18143"},
+                    {"rank":"#7","username":"@shmula","referredBy":"-","proofs":"387","cycles":"2143850368","stars":"17591"},
+                    {"rank":"#8","username":"@tabgnuh","referredBy":"@0xGameOfArt","proofs":"48","cycles":"3707900963","stars":"17501"},
+                    {"rank":"#9","username":"@xDoB3Bw2DZKp4BS","referredBy":"@xxichampagne","proofs":"58","cycles":"12860805426","stars":"17500"},
+                    {"rank":"#10","username":"0x14c9...18d5","referredBy":"@mattstam_eth","proofs":"23","cycles":"6902074232","stars":"17065"},
+                    {"rank":"#11","username":"@nrlartt","referredBy":"@Seu3en","proofs":"125","cycles":"3181268701","stars":"16940"},
+                    {"rank":"#12","username":"@paopaocheeks","referredBy":"@363Rakesh","proofs":"99","cycles":"5580558859","stars":"16673"},
+                    {"rank":"#13","username":"@degenmonik","referredBy":"@DanHennessy","proofs":"77","cycles":"3816745974","stars":"16231"},
+                    {"rank":"#14","username":"@nnewera3","referredBy":"@usernameTr0uva1lle","proofs":"9","cycles":"638258206","stars":"15801"},
+                    {"rank":"#15","username":"@seamlese_man","referredBy":"@mattstam_eth","proofs":"106","cycles":"8846441907","stars":"15724"},
+                    {"rank":"#16","username":"@cryptowluha","referredBy":"@nekurishop","proofs":"54","cycles":"8695897074","stars":"15574"},
+                    {"rank":"#17","username":"@AnNguyen0104955","referredBy":"@ChadFra98523943","proofs":"55","cycles":"8570346151","stars":"15569"},
+                    {"rank":"#18","username":"@ouyoung11","referredBy":"@Oxrazo7","proofs":"39","cycles":"6656292334","stars":"15513"},
+                    {"rank":"#19","username":"0x4f93...5efb","referredBy":"@DanHennessy","proofs":"11","cycles":"265894249","stars":"15444"},
+                    {"rank":"#20","username":"@saitama0x_","referredBy":"@narhem79","proofs":"20","cycles":"3354731652","stars":"15429"},
+                    {"rank":"#21","username":"@LienePryor","referredBy":"@raylo_babe143","proofs":"80","cycles":"8227342946","stars":"15196"},
+                    {"rank":"#22","username":"@pinkkbuny","referredBy":"-","proofs":"47","cycles":"1295331312","stars":"15041"},
+                    {"rank":"#23","username":"@malta2888","referredBy":"@DanHennessy","proofs":"78","cycles":"8472385510","stars":"15038"},
+                    {"rank":"#24","username":"@monark__23","referredBy":"@teddi_speaks","proofs":"63","cycles":"9183767996","stars":"14785"},
+                    {"rank":"#25","username":"0x8a52...05a7","referredBy":"@IKeungkeung","proofs":"89","cycles":"5380932766","stars":"14729"},
+                    {"rank":"#26","username":"@Ho53903Ho","referredBy":"-","proofs":"13","cycles":"1372614196","stars":"14693"},
+                    {"rank":"#27","username":"@kiyo_crypt","referredBy":"@KozlowskiPauloX","proofs":"28","cycles":"6246608038","stars":"14681"},
+                    {"rank":"#28","username":"0x40e9...007a","referredBy":"@CryptoTvist","proofs":"52","cycles":"6789857220","stars":"14600"},
+                    {"rank":"#29","username":"@nadaeseternooo_","referredBy":"-","proofs":"48","cycles":"6145574780","stars":"14574"},
+                    {"rank":"#30","username":"@Stekk781","referredBy":"@MADMAD2607","proofs":"39","cycles":"8682330866","stars":"14403"}
+                ];
+            }
+
+            setupCanvas() {
+                const rect = this.canvas.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+            }
+
+            setupPriceTooltip() {
+                const tooltip = document.getElementById('price-tooltip');
+                if (!tooltip) {
+                    console.log('Price tooltip element not found');
+                    return;
+                }
+                
+                const updateTooltip = () => {
+                    tooltip.textContent = `Current: ${this.currentPrice.toFixed(4)}`;
+                };
+                
+                // Update immediately
+                updateTooltip();
+                
+                // Update tooltip every second
+                setInterval(updateTooltip, 1000);
+                
+                console.log('Price tooltip initialized and updating every second');
+            }
+
+            initializeHistoricalData() {
+                // 1H: 60 points
+                for (let i = 59; i >= 0; i--) {
+                    const price = 1.00 + (Math.random() - 0.5) * 0.1 + (Math.sin(i * 0.1) * 0.05);
+                    this.priceHistory['1H'].push(Math.max(0.01, price));
+                }
+
+                // 1D: 24 points
+                for (let i = 23; i >= 0; i--) {
+                    const price = 1.00 + (Math.random() - 0.5) * 0.2 + (i * 0.01);
+                    this.priceHistory['1D'].push(Math.max(0.01, price));
+                }
+
+                // 1W: 7 points
+                for (let i = 6; i >= 0; i--) {
+                    const price = 1.00 + (Math.random() - 0.5) * 0.3 + (i * 0.02);
+                    this.priceHistory['1W'].push(Math.max(0.01, price));
+                }
+
+                // 1M: 30 points
+                for (let i = 29; i >= 0; i--) {
+                    const price = 1.00 + (Math.random() - 0.5) * 0.5 + (i * 0.005);
+                    this.priceHistory['1M'].push(Math.max(0.01, price));
+                }
+            }
+
+            setupTimeframeControls() {
+                const timeButtons = document.querySelectorAll('.time-btn');
+                timeButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        timeButtons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentTimeframe = btn.dataset.timeframe;
+                        this.drawChart();
+                    });
+                });
+            }
+
+            calculateNextTarget() {
+                // PRICING SYSTEM EXPLANATION:
+                // 1. Base hourly increase of $20 (this.hourlyIncrease = 20)
+                // 2. Random multiplier (0-100%) adds volatility
+                // 3. Creates new target price to move toward over 1 hour
+                const multiplier = Math.random() * 100;
+                const increase = this.hourlyIncrease + (this.hourlyIncrease * multiplier / 100);
+                this.targetPrice = this.currentPrice + increase;
+                
+                console.log(`🎯 New hourly target: ${this.targetPrice.toFixed(4)} (will increase ${increase.toFixed(2)} over next hour)`);
+            }
+
+            generateTrade() {
+                // RANDOM USER SELECTION:
+                // 1. Filter out wallet addresses (0x...), keep only @usernames
+                const validUsers = this.userData.filter(user => user.username.startsWith('@'));
+                if (validUsers.length === 0) {
+                    console.log('No valid users available for trading');
+                    return null;
+                }
+                
+                // 2. Pick completely random user from the list
+                const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
+                
+                // 3. Random action (70% buy, 30% sell = upward price pressure)  
+                const action = Math.random() > 0.3 ? 'bought' : 'sold';
+                
+                // 4. Random amount between 100-5000 $PROVE
+                const amount = Math.floor(Math.random() * 5000) + 100;
+                
+                // PRICE MOVEMENT CALCULATION:
+                // How far through the current hour are we? (0.0 to 1.0)
+                const timeProgress = (Date.now() - this.startTime) % (60 * 60 * 1000) / (60 * 60 * 1000);
+                // How much do we need to move to reach target?
+                const targetDiff = this.targetPrice - this.currentPrice;
+                
+                let priceChange = 0;
+                if (action === 'bought') {
+                    // Buy orders: small upward movement + progress toward hourly target
+                    priceChange = Math.random() * 0.02 + (targetDiff * timeProgress * 0.001);
+                } else {
+                    // Sell orders: small downward movement (smaller than buys)
+                    priceChange = -Math.random() * 0.01;
+                }
+                
+                // Apply price change (minimum $0.01)
+                this.currentPrice = Math.max(0.01, this.currentPrice + priceChange);
+                
+                // CALCULATE TRADE VOLUME (Price × Amount in USD)
+                const tradeVolumeUSD = this.currentPrice * amount;
+                
+                // Add to volume tracking with timestamp
+                const now = Date.now();
+                this.tradeVolumes.push({
+                    volume: tradeVolumeUSD,
+                    timestamp: now
+                });
+                
+                // Clean up volumes older than 24 hours (86400000 ms)
+                const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+                this.tradeVolumes = this.tradeVolumes.filter(trade => trade.timestamp > twentyFourHoursAgo);
+                
+                // Calculate current 24h volume
+                const recent24hVolume = this.tradeVolumes.reduce((sum, trade) => sum + trade.volume, 0);
+                this.volume24h = this.baseVolume + recent24hVolume; // Base volume + live trades
+                
+                // HOURLY TARGET SYSTEM:
+                // Every hour, set new target and reset timer
+                if (Date.now() - this.startTime >= 60 * 60 * 1000) {
+                    console.log(`🎯 Hour completed! Reached target: ${this.currentPrice.toFixed(4)}`);
+                    this.currentPrice = this.targetPrice; // Ensure we hit target
+                    this.startTime = Date.now(); // Reset hour timer
+                    this.calculateNextTarget(); // Set new hourly target
+                }
+
+                const trade = {
+                    user: randomUser.username,
+                    action: action,
+                    amount: amount,
+                    price: this.currentPrice,
+                    volume: tradeVolumeUSD, // Add volume to trade object
+                    timestamp: new Date()
+                };
+
+                console.log(`💰 Trade: ${randomUser.username} ${action} ${amount.toLocaleString()} $PROVE at ${this.currentPrice.toFixed(4)} = ${tradeVolumeUSD.toFixed(2)} volume | 24h Total: ${(this.volume24h/1000000).toFixed(1)}M`);
+
+                // Keep only last 20 trades in memory
+                this.trades.unshift(trade);
+                if (this.trades.length > this.maxTrades) {
+                    this.trades = this.trades.slice(0, this.maxTrades);
+                }
+
+                // Update price history for all timeframes
+                Object.keys(this.priceHistory).forEach(timeframe => {
+                    this.priceHistory[timeframe].push(this.currentPrice);
+                    
+                    const maxPoints = {
+                        '1H': 60,   // 60 minutes of data
+                        '1D': 24,   // 24 hours of data  
+                        '1W': 7,    // 7 days of data
+                        '1M': 30    // 30 days of data
+                    };
+                    
+                    if (this.priceHistory[timeframe].length > maxPoints[timeframe]) {
+                        this.priceHistory[timeframe] = this.priceHistory[timeframe].slice(-maxPoints[timeframe]);
+                    }
+                });
+
+                return trade;
+            }
+
+            updateUI() {
+                document.getElementById('current-price').textContent = `$${this.currentPrice.toFixed(4)}`;
+                
+                const change = this.currentPrice - this.startPrice;
+                const changePercent = ((change / this.startPrice) * 100).toFixed(2);
+                const changeElement = document.getElementById('price-change');
+                
+                if (change >= 0) {
+                    changeElement.innerHTML = `<span>↗</span> +$${change.toFixed(4)} (+${changePercent}%)`;
+                    changeElement.style.color = '#00ff88';
+                } else {
+                    changeElement.innerHTML = `<span>↘</span> -$${Math.abs(change).toFixed(4)} (-${Math.abs(changePercent)}%)`;
+                    changeElement.style.color = '#ff4444';
+                }
+
+                const currentHistory = this.priceHistory[this.currentTimeframe];
+                const high24h = Math.max(...currentHistory);
+                const low24h = Math.min(...currentHistory);
+                const marketCap = (this.currentPrice * 1000000000).toFixed(0);
+                const ath = Math.max(...Object.values(this.priceHistory).flat());
+
+                // Format volume for display (millions/billions)
+                let volumeDisplay;
+                if (this.volume24h >= 1000000000) {
+                    volumeDisplay = `${(this.volume24h / 1000000000).toFixed(2)}B`;
+                } else if (this.volume24h >= 1000000) {
+                    volumeDisplay = `${(this.volume24h / 1000000).toFixed(1)}M`;
+                } else {
+                    volumeDisplay = `${(this.volume24h / 1000).toFixed(0)}K`;
+                }
+
+                document.getElementById('high-24h').textContent = `${high24h.toFixed(4)}`;
+                document.getElementById('low-24h').textContent = `${low24h.toFixed(4)}`;
+                document.getElementById('volume-24h').textContent = volumeDisplay;
+                document.getElementById('market-cap-side').textContent = `${(marketCap / 1000000000).toFixed(2)}B`;
+                document.getElementById('ath-side').textContent = `${ath.toFixed(4)}`;
+
+                document.getElementById('market-cap').textContent = `${(marketCap / 1000000000).toFixed(2)}B`;
+                document.getElementById('volume').textContent = volumeDisplay;
+                document.getElementById('ath').textContent = `${ath.toFixed(4)}`;
+
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            }
+
+            updateTradesList() {
+                const tradesList = document.getElementById('trades-list');
+                tradesList.innerHTML = '';
+
+                this.trades.forEach((trade, index) => {
+                    const tradeElement = document.createElement('div');
+                    tradeElement.className = 'trade-item';
+                    
+                    // Add flash animation to the newest trade (first in list)
+                    if (index === 0) {
+                        tradeElement.style.animation = 'slideIn 0.5s ease, newTradeFlash 1s ease 0.5s';
+                    }
+                    
+                    const actionColor = trade.action === 'bought' ? '#00ff88' : '#ff4444';
+                    const username = trade.user.replace('@', ''); // Remove @ for URL
+                    const displayName = trade.user; // Keep @ for display
+                    
+                    tradeElement.innerHTML = `
+                        <div class="trade-user-info">
+                            <img src="https://unavatar.io/x/${username}" 
+                                 alt="${displayName}" 
+                                 class="trade-user-avatar"
+                                 onerror="this.style.display='none'">
+                            <div class="trade-user-details">
+                                <a href="https://x.com/${username}/" 
+                                   target="_blank" 
+                                   class="trade-user">${displayName}</a>
+                                <div class="trade-action" style="color: ${actionColor};">
+                                    ${trade.action} ${trade.amount.toLocaleString()} $PROVE
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trade-amount">
+                            ${trade.price.toFixed(4)}
+                        </div>
+                    `;
+                    
+                    tradesList.appendChild(tradeElement);
+                });
+            }
+
+            drawChart() {
+                if (!this.ctx) return;
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const currentHistory = this.priceHistory[this.currentTimeframe];
+                if (currentHistory.length < 2) return;
+
+                const padding = 30;
+                const width = this.canvas.width - (padding * 2);
+                const height = this.canvas.height - (padding * 2);
+
+                const minPrice = Math.min(...currentHistory) * 0.98;
+                const maxPrice = Math.max(...currentHistory) * 1.02;
+                const priceRange = maxPrice - minPrice;
+
+                // Draw grid lines
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                this.ctx.lineWidth = 1;
+                
+                for (let i = 0; i <= 6; i++) {
+                    const y = padding + (height / 6) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(padding, y);
+                    this.ctx.lineTo(padding + width, y);
+                    this.ctx.stroke();
+                }
+
+                // Draw gradient fill
+                const gradient = this.ctx.createLinearGradient(0, padding, 0, padding + height);
+                gradient.addColorStop(0, 'rgba(255, 64, 129, 0.3)');
+                gradient.addColorStop(1, 'rgba(255, 64, 129, 0.05)');
+
+                this.ctx.beginPath();
+                currentHistory.forEach((price, index) => {
+                    const x = padding + (width / (currentHistory.length - 1)) * index;
+                    const y = padding + height - ((price - minPrice) / priceRange) * height;
+                    
+                    if (index === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+                
+                this.ctx.lineTo(padding + width, padding + height);
+                this.ctx.lineTo(padding, padding + height);
+                this.ctx.closePath();
+                this.ctx.fillStyle = gradient;
+                this.ctx.fill();
+
+                // Draw price line
+                this.ctx.strokeStyle = '#ff4081';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+
+                currentHistory.forEach((price, index) => {
+                    const x = padding + (width / (currentHistory.length - 1)) * index;
+                    const y = padding + height - ((price - minPrice) / priceRange) * height;
+                    
+                    if (index === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                });
+
+                this.ctx.stroke();
+
+                // Add glow effect
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = '#ff4081';
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+
+                // Draw current price dot
+                const lastPrice = currentHistory[currentHistory.length - 1];
+                const lastX = padding + width;
+                const lastY = padding + height - ((lastPrice - minPrice) / priceRange) * height;
+                
+                this.ctx.beginPath();
+                this.ctx.arc(lastX, lastY, 6, 0, 2 * Math.PI);
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
+
+            startSimulation() {
+                const generateNextTrade = () => {
+                    const trade = this.generateTrade();
+                    if (trade) {
+                        this.updateUI();
+                        this.updateTradesList();
+                        this.drawChart();
+                    }
+                    
+                    const nextInterval = Math.random() * 3000 + 1000; // 1-4 seconds (faster than original but not overwhelming)
+                    setTimeout(generateNextTrade, nextInterval);
+                };
+
+                // Wait a bit for assets to load before starting
+                setTimeout(generateNextTrade, 2000);
+
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.drawChart();
+                });
+            }
+        }
+
+        window.addEventListener('load', () => {
+            new ProveTrading();
+        });
+
+        // Close disclaimer modal
+        function closeDisclaimer() {
+            const modal = document.getElementById('disclaimerModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                // Optional: Store in localStorage so it doesn't show again for this session
+                localStorage.setItem('prove-disclaimer-seen', 'true');
+            }
+        }
+
+        // Check if user has seen disclaimer before
+        window.addEventListener('DOMContentLoaded', () => {
+            const disclaimerSeen = localStorage.getItem('prove-disclaimer-seen');
+            if (disclaimerSeen === 'true') {
+                // User has seen it before, hide immediately
+                const modal = document.getElementById('disclaimerModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
