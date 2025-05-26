@@ -1651,12 +1651,16 @@
                         this.drawChart();
                     }
                     
-                    const nextInterval = Math.random() * 3500 + 1500; // 1.5-5 seconds (slightly slower pace)
+                    // 🕐 TRADE FREQUENCY CONTROL - Adjusted for slower, more comfortable pace
+                    // Current: 2-6 seconds between trades (slower than before)
+                    // Formula: Math.random() * [range] + [minimum]
+                    
+                    const nextInterval = Math.random() * 4000 + 2000; // 2-6 seconds (slower pace)
                     setTimeout(generateNextTrade, nextInterval);
                 };
 
-                // Wait a bit for assets to load before starting
-                setTimeout(generateNextTrade, 2000);
+                // Wait longer for assets and images to load before starting trades
+                setTimeout(generateNextTrade, 4000); // 4 seconds (was 2 seconds)
 
                 window.addEventListener('resize', () => {
                     this.setupCanvas();
