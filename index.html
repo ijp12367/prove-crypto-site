@@ -974,66 +974,93 @@
             async initializeFirebase() {
                 console.log('🔥 Connecting to Firebase...');
                 
-                // Listen for price updates
-                this.priceRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        this.currentPrice = snapshot.val();
-                        this.updateUI();
+                try {
+                    // Test database connection
+                    const testRef = database.ref('.info/connected');
+                    testRef.on('value', (snapshot) => {
+                        if (snapshot.val() === true) {
+                            console.log('✅ Firebase connected successfully!');
+                        } else {
+                            console.log('❌ Firebase connection lost');
+                        }
+                    });
+
+                    // Listen for price updates
+                    this.priceRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            console.log('📊 Price update received:', snapshot.val());
+                            this.currentPrice = snapshot.val();
+                            this.updateUI();
+                            this.drawChart();
+                        } else {
+                            console.log('📊 No price data exists yet');
+                        }
+                    });
+
+                    // Listen for trades updates  
+                    this.tradesRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            console.log('💰 Trades update received');
+                            const firebaseTrades = snapshot.val();
+                            this.trades = Object.values(firebaseTrades).sort((a, b) => b.timestamp - a.timestamp);
+                            this.updateTradesList();
+                        } else {
+                            console.log('💰 No trades data exists yet');
+                        }
+                    });
+
+                    // Listen for volume updates
+                    this.volumeRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            console.log('📈 Volume update received:', snapshot.val());
+                            this.volume24h = snapshot.val();
+                            this.updateUI();
+                        }
+                    });
+
+                    // Listen for target price updates
+                    this.targetRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            this.targetPrice = snapshot.val();
+                            console.log('🎯 Target price update:', this.targetPrice);
+                        }
+                    });
+
+                    // Listen for start time updates
+                    this.startTimeRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            this.startTime = snapshot.val();
+                            console.log('⏰ Start time update:', new Date(this.startTime));
+                        }
+                    });
+
+                    // Initialize historical data locally
+                    this.initializeHistoricalData();
+
+                    // Check if we need to initialize the database
+                    console.log('🔍 Checking if database needs initialization...');
+                    const snapshot = await this.priceRef.once('value');
+                    if (!snapshot.exists()) {
+                        console.log('🚀 Database empty - initializing with starting values...');
+                        await this.initializeDatabase();
+                    } else {
+                        console.log('✅ Database already initialized with price:', snapshot.val());
+                    }
+
+                    // Start the master trading loop
+                    this.startMasterTradingLoop();
+                    
+                    // Handle window resize for chart
+                    window.addEventListener('resize', () => {
+                        this.setupCanvas();
                         this.drawChart();
-                    }
-                });
-
-                // Listen for trades updates  
-                this.tradesRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        const firebaseTrades = snapshot.val();
-                        this.trades = Object.values(firebaseTrades).sort((a, b) => b.timestamp - a.timestamp);
-                        this.updateTradesList();
-                    }
-                });
-
-                // Listen for volume updates
-                this.volumeRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        this.volume24h = snapshot.val();
-                        this.updateUI();
-                    }
-                });
-
-                // Listen for target price updates
-                this.targetRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        this.targetPrice = snapshot.val();
-                    }
-                });
-
-                // Listen for start time updates
-                this.startTimeRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        this.startTime = snapshot.val();
-                    }
-                });
-
-                // Initialize historical data locally
-                this.initializeHistoricalData();
-
-                // Check if we need to initialize the database
-                const snapshot = await this.priceRef.once('value');
-                if (!snapshot.exists()) {
-                    console.log('🚀 Initializing database with starting values...');
-                    await this.initializeDatabase();
+                    });
+                    
+                    console.log('✅ Firebase initialization complete!');
+                    
+                } catch (error) {
+                    console.error('❌ Firebase initialization error:', error);
                 }
-
-                // Start the master trading loop (only one instance across all users)
-                this.startMasterTradingLoop();
-                
-                // Handle window resize for chart
-                window.addEventListener('resize', () => {
-                    this.setupCanvas();
-                    this.drawChart();
-                });
-                
-                console.log('✅ Firebase connected and synced!');
             }
 
             async initializeDatabase() {
