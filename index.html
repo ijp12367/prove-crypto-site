@@ -1174,14 +1174,21 @@
                 const newPrice = Math.max(0.01, this.currentPrice + priceChange);
                 const tradeVolumeUSD = newPrice * amount;
 
-                // Check hourly target
+                // Check hourly target - but NEVER reset to low values!
                 if (Date.now() - this.startTime >= 60 * 60 * 1000) {
-                    console.log(`🎯 Hour completed! New target calculated`);
+                    console.log(`🎯 Hour completed! Current price: ${newPrice.toFixed(4)}`);
+                    
+                    // PROTECTION: Never set target lower than current price + reasonable increase
                     const multiplier = Math.random() * 100;
                     const increase = this.hourlyIncrease + (this.hourlyIncrease * multiplier / 100);
-                    const newTarget = newPrice + increase;
+                    const calculatedTarget = newPrice + increase;
                     
-                    await this.targetRef.set(newTarget);
+                    // SAFETY: Ensure target is always higher than current price
+                    const safeTarget = Math.max(calculatedTarget, newPrice + 5);
+                    
+                    console.log(`🎯 Setting new target: ${safeTarget.toFixed(4)} (was ${this.targetPrice.toFixed(4)})`);
+                    
+                    await this.targetRef.set(safeTarget);
                     await this.startTimeRef.set(Date.now());
                 }
 
