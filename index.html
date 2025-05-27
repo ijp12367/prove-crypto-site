@@ -741,7 +741,7 @@
             <div class="modal-text">
                 <p><strong>This is a PARODY website for entertainment purposes only.</strong></p>
                 <br>
-                <p><strong>$PROVE is NOT currently trading.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
+                <p><strong>$PROVE is NOT a real cryptocurrency.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
                 <br>
                 <p><strong>DO NOT invest real money</strong> based on anything you see on this website. This site is purely for demonstration and entertainment.</p>
             </div>
@@ -862,7 +862,7 @@
 
         <div class="disclaimer">
             <h3>⚠️ PARODY SITE</h3>
-            <p>Simulation only - NOT REAL</p>
+            <p>Simulation only - Not real cryptocurrency</p>
         </div>
     </div>
 
@@ -1651,11 +1651,11 @@
                         this.drawChart();
                     }
                     
-                    // 🕐 TRADE FREQUENCY CONTROL - Adjusted for slower, more comfortable pace
-                    // Current: 2-6 seconds between trades (slower than before)
+                    // 🕐 TRADE FREQUENCY CONTROL - Slightly slower, more comfortable pace
+                    // Current: 2.5-6.5 seconds between trades (increased minimum delay)
                     // Formula: Math.random() * [range] + [minimum]
                     
-                    const nextInterval = Math.random() * 4000 + 2000; // 2-6 seconds (slower pace)
+                    const nextInterval = Math.random() * 4000 + 2500; // 2.5-6.5 seconds (slower minimum)
                     setTimeout(generateNextTrade, nextInterval);
                 };
 
