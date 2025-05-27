@@ -741,7 +741,7 @@
             <div class="modal-text">
                 <p><strong>This is a PARODY website for entertainment purposes only.</strong></p>
                 <br>
-                <p><strong>$PROVE is NOT a real cryptocurrency.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
+                <p><strong>$PROVE is NOT currently trading.</strong> All trading activity, prices, and user interactions shown are completely simulated and fictional.</p>
                 <br>
                 <p><strong>DO NOT invest real money</strong> based on anything you see on this website. This site is purely for demonstration and entertainment.</p>
             </div>
@@ -862,7 +862,7 @@
 
         <div class="disclaimer">
             <h3>⚠️ PARODY SITE</h3>
-            <p>Simulation only - Not real cryptocurrency</p>
+            <p>Simulation only - NOT REAL</p>
         </div>
     </div>
 
@@ -975,7 +975,7 @@
 
             async initializeFirebase() {
                 console.log('🔥 Connecting to Firebase...');
-                
+
                 try {
                     // Test database connection
                     const testRef = database.ref('.info/connected');
@@ -1039,27 +1039,27 @@
                     // Initialize historical data locally
                     this.initializeHistoricalData();
 
-                    // Check if we need to initialize the database
-                    console.log('🔍 Checking if database needs initialization...');
-                    const snapshot = await this.priceRef.once('value');
-                    if (!snapshot.exists()) {
-                        console.log('🚀 Database empty - initializing with starting values...');
-                        await this.initializeDatabase();
+                    // Check if database is already initialized
+                    console.log('🔍 Checking if database has already been initialized...');
+                    const initFlag = await database.ref('prove/initialized').once('value');
+                    if (initFlag.exists() && initFlag.val() === true) {
+                        console.log('✅ Database already initialized — skipping setup.');
                     } else {
-                        console.log('✅ Database already initialized with price:', snapshot.val());
+                        console.log('🚀 Database not yet initialized — running first-time setup...');
+                        await this.initializeDatabase();
                     }
 
                     // Start the master trading loop
                     this.startMasterTradingLoop();
-                    
+
                     // Handle window resize for chart
                     window.addEventListener('resize', () => {
                         this.setupCanvas();
                         this.drawChart();
                     });
-                    
+
                     console.log('✅ Firebase initialization complete!');
-                    
+
                 } catch (error) {
                     console.error('❌ Firebase initialization error:', error);
                 }
@@ -1071,10 +1071,11 @@
                 // Always check the current price just before using it
                 const currentPriceCheck = await this.priceRef.once('value');
                 let basePrice = 1.00;
+
                 if (currentPriceCheck.exists()) {
                     basePrice = currentPriceCheck.val();
                     if (basePrice > 1.1) {
-                        console.log('🛡️  ABORT: Price already exists and is active - canceling initialization');
+                        console.log('🛡️ ABORT: Price already exists and is active - canceling initialization');
                         return;
                     }
                 }
@@ -1090,12 +1091,14 @@
                     await this.startTimeRef.set(Date.now());
                     await this.volumeRef.set(this.baseVolume);
                     await this.tradesRef.set({});
+                    await database.ref('prove/initialized').set(true);  // 🔒 Prevent future reinitialization
 
                     console.log('🎯 Database initialized with infinite price growth system');
                 } catch (error) {
                     console.error('❌ Error during database initialization:', error);
                 }
             }
+
 
 
             async startMasterTradingLoop() {
