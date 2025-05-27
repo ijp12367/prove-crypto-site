@@ -853,7 +853,7 @@
         <div class="trades-section">
             <div class="trades-header">
                 <h3>Recent Trades</h3>
-                <small style="color: #888;">🔥 Global Sync • Last 20 • Fixed Saving</small>
+                <small style="color: #888;">🔥 Global Sync • Reset Protection • Fixed Saving</small>
             </div>
             <div class="trades-list" id="trades-list">
                 <!-- Trades will be populated by JavaScript -->
@@ -1064,12 +1064,38 @@
             }
 
             async initializeDatabase() {
-                // Set initial values in Firebase
-                await this.priceRef.set(1.00);
-                await this.targetRef.set(1.00 + this.hourlyIncrease);
-                await this.startTimeRef.set(Date.now());
-                await this.volumeRef.set(this.baseVolume);
-                await this.tradesRef.set({});
+                console.log('🚀 SAFE INITIALIZATION: Setting up brand new database...');
+                
+                // Double-check one more time before initializing (safety net)
+                const currentPriceCheck = await this.priceRef.once('value');
+                if (currentPriceCheck.exists() && currentPriceCheck.val() > 1.1) {
+                    console.log('🛡️  ABORT: Price already exists and is active - canceling initialization');
+                    return;
+                }
+                
+                try {
+                    // Set conservative initial values
+                    await this.priceRef.set(1.00);
+                    console.log('✅ Set initial price: $1.00');
+                    
+                    await this.targetRef.set(1.00 + this.hourlyIncrease); // This will be 21
+                    console.log('✅ Set initial target: $21.00');
+                    
+                    await this.startTimeRef.set(Date.now());
+                    console.log('✅ Set start time');
+                    
+                    await this.volumeRef.set(this.baseVolume);
+                    console.log('✅ Set initial volume: $24.7M');
+                    
+                    // Initialize empty trades object
+                    await this.tradesRef.set({});
+                    console.log('✅ Set empty trades object');
+                    
+                    console.log('🎯 Database initialization complete - ready to start trading!');
+                    
+                } catch (error) {
+                    console.error('❌ Error during database initialization:', error);
+                }
             }
 
             async startMasterTradingLoop() {
