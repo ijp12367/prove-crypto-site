@@ -1067,38 +1067,36 @@
 
             async initializeDatabase() {
                 console.log('🚀 SAFE INITIALIZATION: Setting up brand new database...');
-                
-                // Double-check one more time before initializing (safety net)
+
+                // Always check the current price just before using it
                 const currentPriceCheck = await this.priceRef.once('value');
-                if (currentPriceCheck.exists() && currentPriceCheck.val() > 1.1) {
-                    console.log('🛡️  ABORT: Price already exists and is active - canceling initialization');
-                    return;
+                let basePrice = 1.00;
+                if (currentPriceCheck.exists()) {
+                    basePrice = currentPriceCheck.val();
+                    if (basePrice > 1.1) {
+                        console.log('🛡️  ABORT: Price already exists and is active - canceling initialization');
+                        return;
+                    }
                 }
-                
+
                 try {
-                    // Set conservative initial values
-                    await this.priceRef.set(1.00);
-                    console.log('✅ Set initial price: $1.00');
-                    
-                    await this.targetRef.set(1.00 + this.hourlyIncrease); // This will be 21
-                    console.log('✅ Set initial target: $21.00');
-                    
+                    await this.priceRef.set(basePrice);
+                    console.log(`✅ Set initial price: $${basePrice.toFixed(2)}`);
+
+                    const initialTarget = basePrice + this.hourlyIncrease * (1 + Math.random());
+                    await this.targetRef.set(initialTarget);
+                    console.log(`✅ Set dynamic target price: $${initialTarget.toFixed(4)}`);
+
                     await this.startTimeRef.set(Date.now());
-                    console.log('✅ Set start time');
-                    
                     await this.volumeRef.set(this.baseVolume);
-                    console.log('✅ Set initial volume: $24.7M');
-                    
-                    // Initialize empty trades object
                     await this.tradesRef.set({});
-                    console.log('✅ Set empty trades object');
-                    
-                    console.log('🎯 Database initialization complete - ready to start trading!');
-                    
+
+                    console.log('🎯 Database initialized with infinite price growth system');
                 } catch (error) {
                     console.error('❌ Error during database initialization:', error);
                 }
             }
+
 
             async startMasterTradingLoop() {
                 // Use Firebase transactions to ensure only one trading loop runs globally
