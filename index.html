@@ -853,7 +853,7 @@
         <div class="trades-section">
             <div class="trades-header">
                 <h3>Recent Trades</h3>
-                <small style="color: #888;">🔥 Global Sync • Reset Protection • Fixed Saving</small>
+                <small style="color: #888;">🚀 Infinite Growth • Global Sync • Reset Protection</small>
             </div>
             <div class="trades-list" id="trades-list">
                 <!-- Trades will be populated by JavaScript -->
@@ -897,10 +897,11 @@
             - One master trading loop runs globally
             - Volume and trades persist across sessions
             
-            📊 PRICING MECHANISM:
-            - Starts at $1.00, guaranteed to climb $20-40+ per hour
-            - One instance generates trades, all users see updates
-            - Hourly targets with random volatility
+            📈 INFINITE GROWTH PRICING:
+            - Price climbs infinitely with no cap
+            - hourlyIncrease (20) is a rate modifier, not a destination
+            - Every hour: new target = current price + (20-40 random growth)
+            - Target price is a dynamic climbing guide that moves up
             - 70% buy pressure creates constant upward movement
             
             💰 VOLUME TRACKING (REAL-TIME):
@@ -908,7 +909,7 @@
             - Synced across all users via Firebase
             - Starts with $24.7M base + live trading volume
             
-            📈 SYNCHRONIZED METRICS:
+            📊 SYNCHRONIZED METRICS:
             - Market Cap: Real-time (Price × 1B supply)
             - Volume: Real-time trading activity
             - All users see identical values instantly
@@ -922,6 +923,7 @@
             - Only one instance generates trades globally
             - Automatic failover if master goes offline
             - Prevents duplicate trading loops
+            - Initialization flag prevents database resets
             
             ⚡ PERFORMANCE:
             - Firebase Realtime Database for instant sync
@@ -1174,21 +1176,19 @@
                 const newPrice = Math.max(0.01, this.currentPrice + priceChange);
                 const tradeVolumeUSD = newPrice * amount;
 
-                // Check hourly target - but NEVER reset to low values!
+                // INFINITE GROWTH: Hourly target logic - always climb higher!
                 if (Date.now() - this.startTime >= 60 * 60 * 1000) {
-                    console.log(`🎯 Hour completed! Current price: ${newPrice.toFixed(4)}`);
+                    console.log(`🚀 Hour completed! Current price: ${newPrice.toFixed(4)}`);
                     
-                    // PROTECTION: Never set target lower than current price + reasonable increase
-                    const multiplier = Math.random() * 100;
-                    const increase = this.hourlyIncrease + (this.hourlyIncrease * multiplier / 100);
-                    const calculatedTarget = newPrice + increase;
+                    // Calculate new target ABOVE current price for infinite growth
+                    const growthMultiplier = Math.random(); // 0.0 to 1.0 for variability
+                    const hourlyGrowth = this.hourlyIncrease * (1 + growthMultiplier); // 20-40 range
+                    const newInfiniteTarget = newPrice + hourlyGrowth;
                     
-                    // SAFETY: Ensure target is always higher than current price
-                    const safeTarget = Math.max(calculatedTarget, newPrice + 5);
+                    console.log(`🎯 New infinite target: ${newInfiniteTarget.toFixed(4)} (growth: +${hourlyGrowth.toFixed(2)})`);
+                    console.log(`📈 Price will climb from ${newPrice.toFixed(4)} toward ${newInfiniteTarget.toFixed(4)} over next hour`);
                     
-                    console.log(`🎯 Setting new target: ${safeTarget.toFixed(4)} (was ${this.targetPrice.toFixed(4)})`);
-                    
-                    await this.targetRef.set(safeTarget);
+                    await this.targetRef.set(newInfiniteTarget);
                     await this.startTimeRef.set(Date.now());
                 }
 
